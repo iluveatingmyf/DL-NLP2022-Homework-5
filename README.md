@@ -8,5 +8,5 @@
 + DL-NLP2022-Homework-5-Liuqiange.pdf ：作业报告
 
 
-————————运行方式————————
+运行方式：
 + 运行 python3 seq2seq_code.py即可将模型保存本地，并输出测试文本的续写内容。

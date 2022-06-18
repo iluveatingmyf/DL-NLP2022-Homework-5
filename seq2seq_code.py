@@ -132,8 +132,8 @@ if __name__ =="__main__":
         # 预定义模型参数
         VOCAB_SIZE = len(set(word_data))
         EPOCHS = 1000
-        BATCH_SIZE = 2
-        TIME_STEPS = 5
+        BATCH_SIZE = 8
+        TIME_STEPS = 100
         BATCH_NUMS = len(numdata) // (BATCH_SIZE * TIME_STEPS)
         HIDDEN_SIZE = 512
         HIDDEN_LAYERS = 6
@@ -169,30 +169,35 @@ if __name__ =="__main__":
         writer.close()
 
 
+        # ============模型测试============
+        with open('./test_text.txt', 'r', encoding='utf-8') as f:
+            test_string = f.readlines()
+            print(f)
+            T = []
+            test_process_string =load_trainset(test_string)
+            print(test_process_string)
+            for word in test_process_string:
+                tmp = word2id[word]
+                T.append(tmp)
+            print(T)
+            print(np.array([T]))
 
-    # 模型测试
-    T = []
-    test_string = '　数十名帮众从四面八方围将上来，手中各持一捆药草，点燃了火，浓烟直冒。段誉刚从地下爬起，突然一阵头晕，又即摔倒，迷迷糊糊之中只见钟灵的身子不住摇晃，跟着也即跌倒。两名帮众奔上来想揪住钟灵，闪电貂护主，跳过去在俩人身上各咬了一口。众人大骇倒退，四下里团团围住，叫嚷吆喝，却无从下手。司空玄叫道：“东方烧雄黄，南方烧麝香，西方北方人人散开。”\
-    诸帮众应命烧起麝香、雄黄。神农帮无药不备，药物更是无一而非上等精品，这麝香、雄黄质纯性强，一经烧起，登时发出气味辛辣的浓烟，顺着东南风向钟灵吹去。不料闪电貂却不怕药气，仍是矫夭灵活，霎时间又咬倒了五名帮众。\
-    司空玄眉头一皱，计上心来，叫道：“铲泥掩盖，将女娃娃连毒貂一起活埋了。'
-    test_process_string =load_trainset(test_string)
-    for word in test_process_string:
-        tmp = word2id[word]
-        T.append(tmp)
-
-    tf.reset_default_graph()
-    evalmodel = RNNModel(1, HIDDEN_SIZE, HIDDEN_LAYERS, VOCAB_SIZE, learning_rate)
-    # 加载模型
-    saver = tf.train.Saver()
-    with tf.Session() as sess:
-        saver.restore(sess, './checkpoints/lstm.ckpt')
-        new_state = sess.run(evalmodel.initial_state)
-        x = np.array([T])
-        samples = []
-        for i in range(100):
-            feed = {evalmodel.inputs: x, evalmodel.keepprb: 1., evalmodel.initial_state: new_state}
-            c, new_state = sess.run([evalmodel.predict, evalmodel.final_state], feed_dict=feed)
-            for j in range(len(T)):
-                x[0][j] = c[0]
-                samples.append(c[0])
-    print('test:', ''.join([id2word[index] for index in samples]))
+            tf.reset_default_graph()
+            evalmodel = RNNModel(1, HIDDEN_SIZE, HIDDEN_LAYERS, VOCAB_SIZE, learning_rate)
+            # 加载模型
+            saver = tf.train.Saver()
+            with tf.Session() as sess:
+                saver.restore(sess, './checkpoints/lstm.ckpt')
+                new_state = sess.run(evalmodel.initial_state)
+                x = np.array([T])
+                samples = []
+                for i in range(100):
+                    feed = {evalmodel.inputs: x, evalmodel.keepprb: 1., evalmodel.initial_state: new_state}
+                    c, new_state = sess.run([evalmodel.predict, evalmodel.final_state], feed_dict=feed)
+                    for j in range(len(T)):
+                        x[0][j] = c[0]
+                        samples.append(c[0])
+                print(x)
+                print(len(c))
+                print(samples)
+                print('test:', ''.join([id2word[index] for index in samples]))
